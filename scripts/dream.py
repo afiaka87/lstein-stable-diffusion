@@ -9,6 +9,11 @@ import sys
 import copy
 import warnings
 import time
+<<<<<<< HEAD
+=======
+sys.path.insert(0, '.')
+from ldm.dream.devices import choose_torch_device
+>>>>>>>  * Add threshold and perlin noise options for Karras samplers.
 import ldm.dream.readline
 from ldm.dream.pngwriter import PngWriter, PromptFormatter
 from ldm.dream.server import DreamServer, ThreadingDreamServer
@@ -677,6 +682,16 @@ def create_cmd_parser():
         default=None,
         type=str,
         help='list of variations to apply, in the format `seed:weight,seed:weight,...'
+        '--threshold',
+        default=0.0,
+        type=float,
+        help='Add threshold value aka perform clipping.',
+    )
+    parser.add_argument(
+        '--perlin',
+        default=0.0,
+        type=float,
+        help='Add perlin noise.',
     )
     return parser
 
