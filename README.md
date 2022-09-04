@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <h1 align='center'><b>InvokeAI: A Stable Diffusion Toolkit</b></h1>
 
 <p align='center'>
@@ -19,51 +18,6 @@ the open source text-to-image generator. It provides a streamlined
 process with various new features and options to aid the image
 generation process. It runs on Windows, Mac and Linux machines,
 and runs on GPU cards with as little as 4 GB or RAM.
-=======
-<div align="center">
-
-# Stable Diffusion Dream Script
-
-![project logo](docs/assets/logo.png)
-
-<p align='center'>
-  <a href="https://discord.gg/ZmtBAhwWhy"><img src="docs/assets/join-us-on-discord-image.png"/></a>
-</p>
-
-# **Stable Diffusion Dream Script**
-[![discord badge]][discord link]
-
-[![latest release badge]][latest release link] [![github stars badge]][github stars link] [![github forks badge]][github forks link]
-
-[![CI checks on main badge]][CI checks on main link] [![CI checks on dev badge]][CI checks on dev link] [![latest commit to dev badge]][latest commit to dev link]
-
-[![github open issues badge]][github open issues link] [![github open prs badge]][github open prs link]
-
-[CI checks on dev badge]: https://flat.badgen.net/github/checks/lstein/stable-diffusion/development?label=CI%20status%20on%20dev&cache=900&icon=github
-[CI checks on dev link]: https://github.com/lstein/stable-diffusion/actions?query=branch%3Adevelopment
-[CI checks on main badge]: https://flat.badgen.net/github/checks/lstein/stable-diffusion/main?label=CI%20status%20on%20main&cache=900&icon=github
-[CI checks on main link]: https://github.com/lstein/stable-diffusion/actions/workflows/test-dream-conda.yml
-[discord badge]: https://flat.badgen.net/discord/members/htRgbc7e?icon=discord
-[discord link]: https://discord.com/invite/htRgbc7e
-[github forks badge]: https://flat.badgen.net/github/forks/lstein/stable-diffusion?icon=github
-[github forks link]: https://useful-forks.github.io/?repo=lstein%2Fstable-diffusion
-[github open issues badge]: https://flat.badgen.net/github/open-issues/lstein/stable-diffusion?icon=github
-[github open issues link]: https://github.com/lstein/stable-diffusion/issues?q=is%3Aissue+is%3Aopen
-[github open prs badge]: https://flat.badgen.net/github/open-prs/lstein/stable-diffusion?icon=github
-[github open prs link]: https://github.com/lstein/stable-diffusion/pulls?q=is%3Apr+is%3Aopen
-[github stars badge]: https://flat.badgen.net/github/stars/lstein/stable-diffusion?icon=github
-[github stars link]: https://github.com/lstein/stable-diffusion/stargazers
-[latest commit to dev badge]: https://flat.badgen.net/github/last-commit/lstein/stable-diffusion/development?icon=github&color=yellow&label=last%20dev%20commit&cache=900
-[latest commit to dev link]: https://github.com/lstein/stable-diffusion/commits/development
-[latest release badge]: https://flat.badgen.net/github/release/lstein/stable-diffusion/development?icon=github
-[latest release link]: https://github.com/lstein/stable-diffusion/releases
-</div>
-
-This is a fork of [CompVis/stable-diffusion](https://github.com/CompVis/stable-diffusion), the open
-source text-to-image generator. It provides a streamlined process with various new features and
-options to aid the image generation process. It runs on Windows, Mac and Linux machines, and runs on
-GPU cards with as little as 4 GB or RAM.
->>>>>>> fix(doc): readme - more meaningful CI links from badges (#645)
 
 _Note: This fork is rapidly evolving. Please use the
 [Issues](https://github.com/invoke-ai/InvokeAI/issues) tab to
@@ -175,7 +129,25 @@ For older changelogs, please visit **[CHANGELOGS](docs/CHANGELOG.md)**.
 
 Please check out our **[Q&A](docs/help/TROUBLESHOOT.md)** to get solutions for common installation problems and other issues.
 
-### Contributing
+# Continous outpainting
+
+This extension uses the new inpainting code to extend an existing image to any direction
+of "top", "right", "bottom" or "left". To use it you need to provide an initial image with
+-I and an extension direction with -D (direction). When extending using outpainting a higher
+img2img strength value of 0.83 is the default. 
+
+~~~~
+dream> man with cat on shoulder -I./images/man.png -D bottom
+~~~~
+
+Or even shorter (the prompt is read from the metadata of the old image)
+
+~~~~
+dream> -I./images/man.png -D bottom
+~~~~
+
+
+# Contributing
 
 Anyone who wishes to contribute to this project, whether documentation, features, bug fixes, code cleanup, testing, or code reviews, is very much encouraged to do so. If you are unfamiliar with
 how to contribute to GitHub projects, here is a [Getting Started Guide](https://opensource.com/article/19/7/create-pull-request-github).
