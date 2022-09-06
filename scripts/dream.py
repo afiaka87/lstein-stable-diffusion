@@ -9,11 +9,8 @@ import sys
 import copy
 import warnings
 import time
-<<<<<<< HEAD
-=======
 sys.path.insert(0, '.')
 from ldm.dream.devices import choose_torch_device
->>>>>>>  * Add threshold and perlin noise options for Karras samplers.
 import ldm.dream.readline
 from ldm.dream.pngwriter import PngWriter, PromptFormatter
 from ldm.dream.server import DreamServer, ThreadingDreamServer
