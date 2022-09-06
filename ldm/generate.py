@@ -201,6 +201,8 @@ class Generate:
             with_variations =   None,
             variation_amount =  0.0,
             # these are specific to img2img and inpaint
+            threshold       =   0.0,
+            perlin          =   0.0,
             init_img       =    None,
             init_mask      =    None,
             fit            =    False,
@@ -332,6 +334,8 @@ class Generate:
                 init_image     = init_image,      # notice that init_image is different from init_img
                 mask_image     = mask_image,
                 strength       = strength,
+                threshold      = threshold,
+                perlin         = perlin
             )
 
             if upscale is not None or gfpgan_strength > 0:

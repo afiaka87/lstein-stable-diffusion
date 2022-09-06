@@ -129,28 +129,7 @@ class DreamServer(BaseHTTPRequestHandler):
 
         content_length = int(self.headers['Content-Length'])
         post_data = json.loads(self.rfile.read(content_length))
-<<<<<<< HEAD
         opt = build_opt(post_data, self.model.seed, gfpgan_model_exists)
-=======
-        prompt = post_data['prompt']
-        initimg = post_data['initimg']
-        strength = float(post_data['strength'])
-        iterations = int(post_data['iterations'])
-        steps = int(post_data['steps'])
-        width = int(post_data['width'])
-        height = int(post_data['height'])
-        fit    = 'fit' in post_data
-        cfgscale = float(post_data['cfgscale'])
-        sampler_name  = post_data['sampler']
-        gfpgan_strength = float(post_data['gfpgan_strength']) if gfpgan_model_exists else 0
-        upscale_level    = post_data['upscale_level']
-        upscale_strength = post_data['upscale_strength']
-        upscale = [int(upscale_level),float(upscale_strength)] if upscale_level != '' else None
-        progress_images = 'progress_images' in post_data
-        seed = self.model.seed if int(post_data['seed']) == -1 else int(post_data['seed'])
-        threshold = float(post_data['threshold'])
-        perlin = float(post_data['perlin'])
->>>>>>>  * Updates for thresholding and perlin noise options, added warmup for thresholding.
 
         self.canceled.clear()
         print(f">> Request to generate with prompt: {opt.prompt}")
