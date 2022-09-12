@@ -27,7 +27,6 @@ templates. They will help aid diagnose issues faster._
 _This repository was formally known as /stable-diffusion_
 
 # **Table of Contents**
-
 1. [Installation](#installation)
 2. [Major Features](#features)
 3. [Changelog](#latest-changes)
@@ -157,7 +156,7 @@ and introducing a new vocabulary to the fixed model.
   - Works on M1 Apple hardware.
   - Multiple bug fixes.
 
-For older changelogs, please visit **[CHANGELOGS](docs/CHANGELOG.md)**.
+For older changelogs, please visit **[CHANGELOGS](docs/CHANGELOG.md)**. 
 
 # Troubleshooting
 
