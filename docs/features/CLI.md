@@ -179,12 +179,14 @@ areas defined by the mask file specified by -M. You may also supply just a singl
 the areas to overpaint made transparent, but you must be careful not to destroy the pixels
 underneath when you create the transparent areas. See [Inpainting](./INPAINTING.md) for details.
 
-inpainting accepts all the arguments used for txt2img and img2img, as well as the --mask (-M)
-argument:
+In addition to the command-line options recognized by txt2img, img2img accepts additional options:
 
-| Argument           | Shortcut | Default | Description                                                                                      |
-| ------------------ | -------- | ------- | ------------------------------------------------------------------------------------------------ |
+| Argument           | Shortcut  | Default | Description                                                                                                                                |
+| ------------------ | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| --init_img <path>  | -I<path>  | None    | Path to the initialization image                                                                                                           |
 | --init_mask <path> | -M<path> | None    | Path to an image the same size as the initial_image, with areas for inpainting made transparent. |
+| --fit              | -F        | False   | Scale the image to fit into the specified -H and -W dimensions                                                                             |
+| --strength <float> | -s<float> | 0.75    | How hard to try to match the prompt to the initial image. Ranges from 0.0-0.99, with higher values replacing the initial image completely. |
 
 ## Command-line editing and completion
 

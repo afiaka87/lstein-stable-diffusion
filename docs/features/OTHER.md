@@ -28,6 +28,32 @@ dream> "pond garden with lotus by claude monet" --seamless -s100 -n4
 
 ---
 
+## **Reading Prompts from a File**
+
+You can automate `dream.py` by providing a text file with the prompts you want to run, one line per
+prompt. The text file must be composed with a text editor (e.g. Notepad) and not a word processor.
+Each line should look like what you would type at the dream> prompt:
+
+```bash
+a beautiful sunny day in the park, children playing -n4 -C10
+stormy weather on a mountain top, goats grazing     -s100
+innovative packaging for a squid's dinner           -S137038382
+```
+
+Then pass this file's name to `dream.py` when you invoke it:
+
+```bash
+(ldm) ~/stable-diffusion$ python3 scripts/dream.py --from_file "path/to/prompts.txt"
+```
+
+You may read a series of prompts from standard input by providing a filename of `-`:
+
+```bash
+(ldm) ~/stable-diffusion$ echo "a beautiful day" | python3 scripts/dream.py --from_file -
+```
+
+---
+
 ## **Shortcuts: Reusing Seeds**
 
 Since it is so common to reuse seeds while refining a prompt, there is now a shortcut as of version
@@ -61,6 +87,7 @@ example consider this prompt:
 
 ```bash
 tabby cat:0.25 white duck:0.75 hybrid
+<<<<<<< HEAD
 ```
 
 This will tell the sampler to invest 25% of its effort on the tabby cat aspect of the image and 75%
@@ -87,6 +114,13 @@ Here's an example of another prompt used when setting the threshold to 5 and per
 ```
 
 Note: currently the thresholding feature is only implemented for the k-diffusion style samplers, and empirically appears to work best with `k_euler_a` and `k_dpm_2_a`. Using 0 disables thresholding. Using 0 for perlin noise disables using perlin noise for initialization. Finally, using 1 for perlin noise uses only perlin noise for initialization.
+=======
+```
+
+This will tell the sampler to invest 25% of its effort on the tabby cat aspect of the image and 75%
+on the white duck aspect (surprisingly, this example actually works). The prompt weights can use any
+combination of integers and floating point numbers, and they do not need to add up to 1.
+>>>>>>> 5e27b32... Mkdocs-material (#575)
 
 ---
 

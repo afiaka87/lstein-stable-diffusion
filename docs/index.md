@@ -34,6 +34,7 @@ _Note: This fork is rapidly evolving. Please use the
 [Issues](https://github.com/lstein/stable-diffusion/issues) tab to report bugs and make feature
 requests. Be sure to use the provided templates. They will help aid diagnose issues faster._
 
+
 ## Installation
 
 This fork is supported across multiple platforms. You can find individual installation instructions

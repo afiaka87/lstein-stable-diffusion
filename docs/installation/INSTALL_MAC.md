@@ -108,6 +108,7 @@ python scripts/orig_scripts/txt2img.py --prompt "a photograph of an astronaut ri
 ```
 
 Note,
+<<<<<<< HEAD
 
 ```bash
 export PIP_EXISTS_ACTION=w
@@ -121,6 +122,21 @@ conda env create -f environment-mac.yaml
 
 never finishing in some situations. So it isn't required but wont hurt.
 
+=======
+
+```bash
+export PIP_EXISTS_ACTION=w
+```
+
+is a precaution to fix
+
+```bash
+conda env create -f environment-mac.yaml
+```
+
+never finishing in some situations. So it isn't required but wont hurt.
+
+>>>>>>> 5e27b32... Mkdocs-material (#575)
 After you follow all the instructions and run dream.py you might get several
 errors. Here's the errors I've seen and found solutions for.
 
@@ -161,6 +177,7 @@ If it takes forever to run
 ```bash
 conda env create -f environment-mac.yaml
 ```
+<<<<<<< HEAD
 
 you could try to run `git clean -f` followed by:
 
@@ -174,6 +191,21 @@ conda update --force-reinstall -y -n base -c defaults conda
 
 ---
 
+=======
+
+you could try to run `git clean -f` followed by:
+
+`conda clean --yes --all`
+
+Or you could try to completley reset Anaconda:
+
+```bash
+conda update --force-reinstall -y -n base -c defaults conda
+```
+
+---
+
+>>>>>>> 5e27b32... Mkdocs-material (#575)
 ### "No module named cv2", torch, 'ldm', 'transformers', 'taming', etc
 
 There are several causes of these errors.
@@ -181,6 +213,7 @@ There are several causes of these errors.
 - First, did you remember to `conda activate ldm`? If your terminal prompt
   begins with "(ldm)" then you activated it. If it begins with "(base)" or
   something else you haven't.
+<<<<<<< HEAD
 
 - Second, you might've run `./scripts/preload_models.py` or `./scripts/dream.py`
   instead of `python ./scripts/preload_models.py` or
@@ -195,6 +228,17 @@ conda deactivate
 conda env remove -n ldm
 PIP_EXISTS_ACTION=w CONDA_SUBDIR=osx-arm64 conda env create -f environment-mac.yaml
 ```
+=======
+
+- Second, you might've run `./scripts/preload_models.py` or `./scripts/dream.py`
+  instead of `python ./scripts/preload_models.py` or
+  `python ./scripts/dream.py`. The cause of this error is long so it's below.
+
+- Third, if it says you're missing taming you need to rebuild your virtual
+  environment.
+
+`conda env remove -n ldm conda env create -f environment-mac.yaml`
+>>>>>>> 5e27b32... Mkdocs-material (#575)
 
 Fourth, If you have activated the ldm virtual environment and tried rebuilding
 it, maybe the problem could be that I have something installed that you don't
