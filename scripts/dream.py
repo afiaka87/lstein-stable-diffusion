@@ -183,13 +183,7 @@ def main_loop(gen, opt, infile):
                 opt.seed = None
                 continue
 
-<<<<<<< HEAD
-        # TODO - move this into a module
         opt.strength = 0.83 if opt.out_direction and opt.strength is None else opt.strength
-=======
-        if opt.strength is None:
-            opt.strength = 0.75 if opt.out_direction is None else 0.75
->>>>>>> 8d2afef... fixup
 
         if opt.with_variations is not None:
             # shotgun parsing, woo
