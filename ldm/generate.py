@@ -847,24 +847,3 @@ class Generate:
 
     def _has_cuda(self):
         return self.device.type == 'cuda'
-
-    def _cached_sha256(self,path,data):
-        dirname    = os.path.dirname(path)
-        basename   = os.path.basename(path)
-        base, _    = os.path.splitext(basename)
-        hashpath   = os.path.join(dirname,base+'.sha256')
-        if os.path.exists(hashpath) and os.path.getmtime(path) <= os.path.getmtime(hashpath):
-            with open(hashpath) as f:
-                hash = f.read()
-            return hash
-        print(f'>> Calculating sha256 hash of weights file')
-        tic = time.time()
-        sha = hashlib.sha256()
-        sha.update(data)
-        hash = sha.hexdigest()
-        toc = time.time()
-        print(f'>> sha256 = {hash}','(%4.2fs)' % (toc - tic))
-        with open(hashpath,'w') as f:
-            f.write(hash)
-        return hash
-
