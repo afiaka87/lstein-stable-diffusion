@@ -4,7 +4,7 @@ import copy
 import base64
 import mimetypes
 import os
-from ldm.dream.args import Args, metadata_dumps
+from ldm.dream.args import Args, format_metadata
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from ldm.dream.pngwriter import PngWriter
 from threading import Event
@@ -175,9 +175,10 @@ class DreamServer(BaseHTTPRequestHandler):
             path = pngwriter.save_image_and_prompt_to_png(
                 image,
                 dream_prompt   = formatted_prompt,
-                metadata = metadata_dumps(iter_opt,
-                                          seeds      = [seed],
-                                          model_hash = self.model.model_hash
+                metadata = format_metadata(iter_opt,
+                                           seeds      = [seed],
+                                           weights    = self.model.weights,
+                                           model_hash = self.model.model_hash
                 ),
                 name     = name,
             )

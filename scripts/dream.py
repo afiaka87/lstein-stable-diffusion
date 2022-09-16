@@ -9,7 +9,7 @@ import copy
 import warnings
 import time
 import ldm.dream.readline
-from ldm.dream.args import Args, metadata_dumps
+from ldm.dream.args import Args, format_metadata
 from ldm.dream.pngwriter import PngWriter
 from ldm.dream.server import DreamServer, ThreadingDreamServer
 from ldm.dream.image_util import make_grid
@@ -126,7 +126,11 @@ def main_loop(gen, opt, infile):
         if command.startswith(('#', '//')):
             continue
 
+<<<<<<< HEAD
         if len(command.strip()) == 1 and command.startswith('q'):
+=======
+        if command.startswith('q '):
+>>>>>>> 50585b4... implementation of RFC #266 (#587)
             done = True
             break
 
@@ -135,7 +139,14 @@ def main_loop(gen, opt, infile):
         ):   # in case a stored prompt still contains the !dream command
             command.replace('!dream','',1)
 
+<<<<<<< HEAD
         if opt.parse_cmd(command) is None:
+=======
+        try:
+            parser = opt.parse_cmd(command)
+        except SystemExit:
+            parser.print_help()
+>>>>>>> 50585b4... implementation of RFC #266 (#587)
             continue
 
         if opt.init_img:
@@ -185,6 +196,7 @@ def main_loop(gen, opt, infile):
 
         opt.strength = 0.83 if opt.out_direction and opt.strength is None else opt.strength
 
+        # TODO - move this into a module
         if opt.with_variations is not None:
             # shotgun parsing, woo
             parts = []
@@ -217,7 +229,11 @@ def main_loop(gen, opt, infile):
             # truncate path to maximum allowed length
             # 27 is the length of '######.##########.##.png', plus two separators and a NUL
             subdir = subdir[:(path_max - 27 - len(os.path.abspath(opt.outdir)))]
+<<<<<<< HEAD
             current_outdir = os.path.join(opt.outdir, subdir)
+=======
+            current_outdir = os.path.join(outdir, subdir)
+>>>>>>> 50585b4... implementation of RFC #266 (#587)
 
             print('Writing files to directory: "' + current_outdir + '"')
 
@@ -250,21 +266,44 @@ def main_loop(gen, opt, infile):
                         filename = f'{prefix}.{seed}.postprocessed.png'
                     else:
                         filename = f'{prefix}.{seed}.png'
+                    # the handling of variations is probably broken
+                    # Also, given the ability to add stuff to the dream_prompt_str, it isn't
+                    # necessary to make a copy of the opt option just to change its attributes
                     if opt.variation_amount > 0:
+<<<<<<< HEAD
                         first_seed             = first_seed or seed
                         this_variation         = [[seed, opt.variation_amount]]
                         opt.with_variations    = prior_variations + this_variation
                         formatted_dream_prompt = opt.dream_prompt_str(seed=first_seed)
                     elif len(prior_variations) > 0:
                         formatted_dream_prompt = opt.dream_prompt_str(seed=first_seed)
+=======
+                        iter_opt       = copy.copy(opt)
+                        this_variation = [[seed, opt.variation_amount]]
+                        if opt.with_variations is None:
+                            iter_opt.with_variations = this_variation
+                        else:
+                            iter_opt.with_variations = opt.with_variations + this_variation
+                        iter_opt.variation_amount = 0
+                        formatted_dream_prompt = iter_opt.dream_prompt_str(seed=seed)
+                    elif opt.with_variations is not None:
+                        formatted_dream_prompt = opt.dream_prompt_str(seed=seed)
+>>>>>>> 50585b4... implementation of RFC #266 (#587)
                     else:
                         formatted_dream_prompt = opt.dream_prompt_str(seed=seed)
                     path = file_writer.save_image_and_prompt_to_png(
                         image           = image,
                         dream_prompt    = formatted_dream_prompt,
+<<<<<<< HEAD
                         metadata        = metadata_dumps(
                             opt,
                             seeds      = [seed],
+=======
+                        metadata        = format_metadata(
+                            opt,
+                            seeds      = [seed],
+                            weights    = gen.weights,
+>>>>>>> 50585b4... implementation of RFC #266 (#587)
                             model_hash = gen.model_hash,
                         ),
                         name      = filename,
@@ -288,7 +327,11 @@ def main_loop(gen, opt, infile):
                 filename   = f'{prefix}.{first_seed}.png'
                 formatted_dream_prompt  = opt.dream_prompt_str(seed=first_seed,grid=True,iterations=len(grid_images))
                 formatted_dream_prompt += f' # {grid_seeds}'
+<<<<<<< HEAD
                 metadata = metadata_dumps(
+=======
+                metadata = format_metadata(
+>>>>>>> 50585b4... implementation of RFC #266 (#587)
                     opt,
                     seeds      = grid_seeds,
                     weights    = gen.weights,

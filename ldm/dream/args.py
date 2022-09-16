@@ -88,6 +88,7 @@ import os
 import copy
 import base64
 from ldm.dream.conditioning import split_weighted_subprompts
+import traceback
 
 SAMPLER_CHOICES = [
     'ddim',
@@ -131,7 +132,6 @@ class Args(object):
         try:
             elements = shlex.split(command)
         except ValueError:
-            import sys, traceback
             print(traceback.format_exc(), file=sys.stderr)
             return
         switches = ['']
@@ -452,8 +452,8 @@ class Args(object):
             help='generate a grid'
         )
         render_group.add_argument(
-            '-i',
             '--individual',
+            '-i',
             action='store_true',
             help='override command-line --grid setting and generate individual images'
         )
@@ -483,6 +483,7 @@ class Args(object):
             '--outdir',
             '-o',
             type=str,
+            default='outputs/img-samples',
             help='Directory to save generated images and a log of prompts and seeds',
         )
         img2img_group.add_argument(
@@ -652,70 +653,24 @@ def metadata_dumps(opt,
     if opt.init_img:
         rfc_dict['type']           = 'img2img'
         rfc_dict['strength_steps'] = rfc_dict.pop('strength')
-        rfc_dict['orig_hash']      = calculate_init_img_hash(opt.init_img)
+        rfc_dict['orig_hash']      = sha256(image_dict['init_img'])
         rfc_dict['sampler']        = 'ddim'  # FIX ME WHEN IMG2IMG SUPPORTS ALL SAMPLERS
     else:
         rfc_dict['type']  = 'txt2img'
 
-    if len(seeds)==0 and opt.seed:
-        seeds=[seed]
+    images = []
+    for seed in seeds:
+        rfc_dict['seed'] = seed
+        images.append(copy.copy(rfc_dict))
 
-    if opt.grid:
-        images = []
-        for seed in seeds:
-            rfc_dict['seed'] = seed
-            images.append(copy.copy(rfc_dict))
-        metadata['images'] = images
-    else:
-        # there should only ever be a single seed if we did not generate a grid
-        assert len(seeds) == 1, 'Expected a single seed'
-        rfc_dict['seed'] = seeds[0]
-        metadata['image'] = rfc_dict
-
-    return metadata
-
-def metadata_loads(metadata):
-    '''
-    Takes the dictionary corresponding to RFC266 (https://github.com/lstein/stable-diffusion/issues/266)
-    and returns a series of opt objects for each of the images described in the dictionary.
-    '''
-    results = []
-    try:
-        if 'grid' in metadata['sd-metadata']:
-            images = metadata['sd-metadata']['images']
-        else:
-            images = [metadata['sd-metadata']['image']]
-        for image in images:
-            # repack the prompt and variations
-            image['prompt']     = ','.join([':'.join([x['prompt'],   str(x['weight'])]) for x in image['prompt']])
-            image['variations'] = ','.join([':'.join([str(x['seed']),str(x['weight'])]) for x in image['variations']])
-            # fix a bit of semantic drift here
-            image['sampler_name']=image.pop('sampler')
-            opt = Args()
-            opt._cmd_switches = Namespace(**image)
-            results.append(opt)
-    except KeyError as e:
-        import sys, traceback
-        print('>> badly-formatted metadata',file=sys.stderr)
-        print(traceback.format_exc(), file=sys.stderr)
-    return results
-
-# image can either be a file path on disk or a base64-encoded
-# representation of the file's contents
-def calculate_init_img_hash(image_string):
-    prefix = 'data:image/png;base64,'
-    hash   = None
-    if image_string.startswith(prefix):
-        imagebase64 = image_string[len(prefix):]
-        imagedata   = base64.b64decode(imagebase64)
-        with open('outputs/test.png','wb') as file:
-            file.write(imagedata)
-        sha = hashlib.sha256()
-        sha.update(imagedata)
-        hash = sha.hexdigest()
-    else:
-        hash = sha256(image_string)
-    return hash
+    return {
+        'model'       : 'stable diffusion',
+        'model_id'    : opt.model,
+        'model_hash'  : model_hash,
+        'app_id'      : APP_ID,
+        'app_version' : APP_VERSION,
+        'images'      : images,
+    }
 
 # Bah. This should be moved somewhere else...
 def sha256(path):
