@@ -1,15 +1,32 @@
 # Builds on work from Lincoln D. Stein @ (https://github.com/lstein/stable-diffusion/blob/master/scripts/dream.py)
 
 # cog support by Clay Mullis aka @afiaka87, various refactorings for single-call use, rather than using events.
-# Copyright (c) 20222 afiaka87 aka Clay Mullis, (https://github.com/afiaka87)
+# Copyright (c) 20222 afiaka87 aka Clay Mullis, (https://github.com/afiaka870)
 
 # Derived from source code carrying the following copyrights
 # Copyright (c) 2022 Machine Vision and Learning Group, LMU Munich
 # Copyright (c) 2022 Robin Rombach and Patrick Esser and contributors
 # Copyright (c) 2022 Lincoln D. Stein (https://github.com/lstein)
 
+import random
+
+from pynvml import (nvmlDeviceGetHandleByIndex, nvmlDeviceGetMemoryInfo,
+                    nvmlInit)
+
+
+def print_gpu_info(device_id: int = 0):
+    nvmlInit()
+    h = nvmlDeviceGetHandleByIndex(device_id)
+    info = nvmlDeviceGetMemoryInfo(h)
+    total = info.total / 1024**3
+    free = info.free / 1024**3
+    used = info.used / 1024**3
+    print(f"GPU {device_id}: {used:.2f}/{total:2f}GB used ({free:.2f}GB free)")
+
+
 import sys
-from random import randint
+
+import torch
 
 sys.path.append("k-diffusion")
 import tempfile
@@ -38,6 +55,17 @@ SAMPLER_CHOICES = [
     "plms",
 ]
 
+# from PIL import PngImagePlugin, Image
+# def image_progress(sample, step):
+#     if step < steps - 1 and progress_images and step % progress_interval == 0:
+#         pil_image = self.diffusion_model.sample_to_image(sample)
+#         image_name = self.current_outdir / f"{prefix}.{seed}.{step:04d}.png"
+#         info = PngImagePlugin.PngInfo()
+#         info.add_text("Dream", prompt)
+#         info.add_text("sd-metadata", json.dumps(metadata_dict))
+#         pil_image.save(image_name, pnginfo=info)
+#         print(f"Saved progress image {image_name} at timestep {step}")
+
 
 class ImageSeedOutput(BaseModel):
     image_path: Path
@@ -47,6 +75,7 @@ class ImageSeedOutput(BaseModel):
 class Predictor(BasePredictor):
     def setup(self):
         """Load the model into memory to make running multiple predictions efficient"""
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.current_outdir = Path(tempfile.mkdtemp())
         self.current_outdir.mkdir(parents=True, exist_ok=True)
 
@@ -54,8 +83,6 @@ class Predictor(BasePredictor):
         self.gfpgan_dir = "/root/.cache/gfpgan"
 
         self.file_writer = PngWriter(self.current_outdir)
-        self.prefix = self.file_writer.unique_prefix()
-
         self.diffusion_model = Generate(
             model="stable-diffusion-1.4",  # TODO update this when stable-diffusion V1.5 is released
             full_precision=False,
@@ -74,7 +101,8 @@ class Predictor(BasePredictor):
             description="Refinement steps per iteration", default=50, le=500, ge=5
         ),
         seed: int = Input(
-            description="Seed for random number generator, use -1 for a random seed.", default=-1
+            description="Seed for random number generator, use -1 for a random seed.",
+            default=-1,
         ),
         variation_amount: float = Input(
             description="Variation amount", default=0.0, le=1.0, ge=0.0
@@ -158,9 +186,8 @@ class Predictor(BasePredictor):
     ) -> List[ImageSeedOutput]:
         """Generate an image from a prompt"""
         if seed <= -1:
-            seed = randint(0, 2 ** 32 - 1)
-
-        def step_callback()
+            seed = random.randint(0, 2**32 - 1)
+        print_gpu_info()
         return [
             ImageSeedOutput(image_path=Path(image_path), seed=seed)
             for image_path, seed in self.diffusion_model.prompt2png(
@@ -173,7 +200,7 @@ class Predictor(BasePredictor):
                 ddim_eta=ddim_eta,
                 skip_normalize=skip_normalize,
                 # image_callback=None,
-                # step_callback=None,
+                # step_callback=image_progress,
                 width=width,
                 height=height,
                 sampler_name=sampler_name,
