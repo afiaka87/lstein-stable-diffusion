@@ -1,22 +1,10 @@
 <html lang="en">
-  <head>
-    <title>Stable Diffusion Dream Server</title>
-    <meta charset="utf-8">
-    <link rel="icon" href="data:,">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="index.css">
-    <script src="config.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
-    <script src="index.js"></script>
-  </head>
-  <body>
-    <header>
-      <h1>Stable Diffusion Dream Server</h1>
-      <div id="about">
-        For news and support for this web service, visit our <a href="http://github.com/lstein/stable-diffusion">GitHub site</a>
-      </div>
-    </header>
+<head>
+  <title>Stable Diffusion Dream Server</title>
+  <meta charset="utf-8">
+  <link rel="icon" type="image/x-icon" href="static/dream_web/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <main>
       <form id="generate-form" method="post" action="api/jobs">
@@ -95,17 +83,33 @@
           <label title="Upload an image to use img2img" for="initimg">Initial image:</label>
           <input type="file" id="initimg" name="initimg" accept=".jpg, .jpeg, .png">
           <button type="button" id="remove-image">Remove Image</button>
-	    <br>
-	    <label for="strength">Img2Img Strength:</label>
-	    <input value="0.75" type="number" id="strength" name="strength" step="0.01" min="0" max="1">
-	    <input type="checkbox" id="fit" name="fit" checked>
-	    <label title="Rescale image to fit within requested width and height" for="fit">Fit to width/height</label>
-	</fieldset>
+        </div>
+        <fieldset id="img2img">
+          <legend>
+            <input type="checkbox" name="enable_img2img" id="enable_img2img" checked>
+            <label for="enable_img2img">Enable Img2Img</label>
+          </legend>
+          <label for="strength">Img2Img Strength:</label>
+          <input value="0.75" type="number" id="strength" name="strength" step="0.01" min="0" max="1">
+          <input type="checkbox" id="fit" name="fit" checked>
+          <label title="Rescale image to fit within requested width and height" for="fit">Fit to width/height:</label>
+        </fieldset>
+      </fieldset>
+      <div id="postprocess">
         <fieldset id="gfpgan">
-	  <div class="section-header">Post-processing options</div>
-          <label title="Strength of the gfpgan (face fixing) algorithm." for="gfpgan_strength">GPFGAN Strength (0 to disable):</label>
-          <input value="0.0" min="0" max="1" type="number" id="gfpgan_strength" name="gfpgan_strength" step="0.1">
-          <label title="Upscaling to perform using ESRGAN." for="upscale_level">Upscaling Level</label>
+          <legend>
+            <input type="checkbox" name="enable_gfpgan" id="enable_gfpgan">
+            <label for="enable_gfpgan">Enable gfpgan</label>
+          </legend>
+          <label title="Strength of the gfpgan (face fixing) algorithm." for="gfpgan_strength">GPFGAN Strength:</label>
+          <input value="0.8" min="0" max="1" type="number" id="gfpgan_strength" name="gfpgan_strength" step="0.05">
+        </fieldset>
+        <fieldset id="upscale">
+          <legend>
+            <input type="checkbox" name="enable_upscale" id="enable_upscale">
+            <label for="enable_upscale">Enable Upscaling</label>
+          </legend>
+          <label title="Upscaling to perform using ESRGAN." for="upscale_level">Upscaling Level:</label>
           <select id="upscale_level" name="upscale_level" value="">
             <option value="" selected>None</option>
             <option value="2">2x</option>
@@ -114,25 +118,25 @@
           <label title="Strength of the esrgan (upscaling) algorithm." for="upscale_strength">Upscale Strength:</label>
           <input value="0.75" min="0" max="1" type="number" id="upscale_strength" name="upscale_strength" step="0.05">
         </fieldset>
-      </form>
-      <br>
-      <section id="progress-section">
-        <div id="progress-container">
-          <progress id="progress-bar" value="0" max="1"></progress>
-          <span id="cancel-button" title="Cancel">&#10006;</span>
-          <br>
-          <img id="progress-image" src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>'>
-          <div id="scaling-inprocess-message">
-            <i><span>Postprocessing...</span><span id="processing_cnt">1</span>/<span id="processing_total">3</span></i>
-          </div>
-        </span>
-      </section>
-
-      <div id="results">
-        <div id="no-results-message">
-          <i><p>No results...</p></i>
+      </div>
+      <input type="submit" id="submit" value="Generate">
+    </form>
+    <br>
+    <section id="progress-section">
+      <div id="progress-container">
+        <progress id="progress-bar" value="0" max="1"></progress>
+        <span id="cancel-button" title="Cancel">&#10006;</span>
+        <br>
+        <img id="progress-image" src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>'>
+        <div id="scaling-inprocess-message">
+          <i><span>Postprocessing...</span><span id="processing_cnt">1</span>/<span id="processing_total">3</span></i>
         </div>
       </div>
-    </main>
-  </body>
+    </section>
+
+    <div id="results">
+    </div>
+  </main>
+</body>
+
 </html>
