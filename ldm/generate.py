@@ -65,9 +65,7 @@ gr.load_model()
 # Will call load_model() if the model was not previously loaded and so
 # may be slow at first.
 # The method returns a list of images. Each row of the list is a sub-list of [filename,seed]
-results = gr.prompt2png(prompt     = "an astronaut riding a horse",
-                         outdir     = "./outputs/samples",
-                         iterations = 3)
+results = gr.prompt2png(prompt     = "an astronaut riding a horse", outdir     = "./outputs/samples", iterations = 3)
 
 for row in results:
     print(f'filename={row[0]}')
@@ -180,8 +178,7 @@ class Generate:
         outputs   = []
         for image, seed in results:
             name = f'{prefix}.{seed}.png'
-            path = pngwriter.save_image_and_prompt_to_png(
-                image, f'{prompt} -S{seed}', name)
+            path = pngwriter.save_image_and_prompt_to_png(image=image, dream_prompt=f'{prompt} -S{seed}', metadata={'seed': seed}, name=name)
             outputs.append([path, seed])
         return outputs
 
@@ -363,11 +360,11 @@ class Generate:
             )
 
             if upscale is not None or gfpgan_strength > 0:
-                self.upscale_and_reconstruct(results,
+                self.upscale_and_reconstruct(image_list     = results,
                                              upscale        = upscale,
                                              strength       = gfpgan_strength,
-                                             save_original  = save_original,
-                                             image_callback = image_callback)
+                                             image_callback = image_callback,
+                                             gfpgan_dir     = gfpgan_dir)
 
         except RuntimeError as e:
             print(traceback.format_exc(), file=sys.stderr)
@@ -479,8 +476,9 @@ class Generate:
                                 image_list,
                                 upscale       = None,
                                 strength      =  0.0,
-                                save_original = False,
-                                image_callback = None):
+                                save_original = False, # TODO deprecated
+                                image_callback= None,
+                                gfpgan_dir    = None):
         try:
             if upscale is not None:
                 from ldm.gfpgan.gfpgan_tools import real_esrgan_upscale
@@ -498,14 +496,18 @@ class Generate:
                     if len(upscale) < 2:
                         upscale.append(0.75)
                     image = real_esrgan_upscale(
-                        image,
-                        upscale[1],
-                        int(upscale[0]),
-                        seed,
+                        image=image,
+                        strength=upscale[1],
+                        upsampler_scale=int(upscale[0]),
+                        seed=seed,
                     )
                 if strength > 0:
                     image = run_gfpgan(
-                        image, strength, seed, 1
+                        image=image,
+                        strength=strength,
+                        seed=seed,
+                        upsampler_scale=1,
+                        gfpgan_dir=gfpgan_dir
                     )
             except Exception as e:
                 print(
