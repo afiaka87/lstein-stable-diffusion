@@ -177,7 +177,6 @@ If it takes forever to run
 ```bash
 conda env create -f environment-mac.yaml
 ```
-<<<<<<< HEAD
 
 you could try to run `git clean -f` followed by:
 
@@ -191,21 +190,6 @@ conda update --force-reinstall -y -n base -c defaults conda
 
 ---
 
-=======
-
-you could try to run `git clean -f` followed by:
-
-`conda clean --yes --all`
-
-Or you could try to completley reset Anaconda:
-
-```bash
-conda update --force-reinstall -y -n base -c defaults conda
-```
-
----
-
->>>>>>> 5e27b32... Mkdocs-material (#575)
 ### "No module named cv2", torch, 'ldm', 'transformers', 'taming', etc
 
 There are several causes of these errors.
@@ -237,8 +221,17 @@ PIP_EXISTS_ACTION=w CONDA_SUBDIR=osx-arm64 conda env create -f environment-mac.y
 - Third, if it says you're missing taming you need to rebuild your virtual
   environment.
 
+<<<<<<< HEAD
 `conda env remove -n ldm conda env create -f environment-mac.yaml`
 >>>>>>> 5e27b32... Mkdocs-material (#575)
+=======
+````bash
+conda deactivate
+
+conda env remove -n ldm
+PIP_EXISTS_ACTION=w CONDA_SUBDIR=osx-arm64 conda env create -f environment-mac.yaml
+```
+>>>>>>> 397290f... respect --outdir again; fix issue #628
 
 Fourth, If you have activated the ldm virtual environment and tried rebuilding
 it, maybe the problem could be that I have something installed that you don't
