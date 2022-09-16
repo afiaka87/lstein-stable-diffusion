@@ -226,6 +226,7 @@ class Generate:
             upscale          = None,
             # Set this True to handle KeyboardInterrupt internally
             catch_interrupts = False,
+            gfpgan_dir       = os.path.expanduser("~/.cache/gfpgan/experiments/pretrained_models"),
             **args,
     ):   # eat up additional cruft
         """
