@@ -86,10 +86,14 @@ To run in full-precision mode, start `dream.py` with the
 - [Seamless Tiling](docs/features/OTHER.md#seamless-tiling)
 - [Google Colab](docs/features/OTHER.md#google-colab)
 - [Web Server](docs/features/WEB.md)
-- [Reading Prompts From File](docs/features/PROMPTS.md#reading-prompts-from-a-file)
+- [Reading Prompts From File](docs/features/OTHER.md#reading-prompts-from-a-file)
 - [Shortcut: Reusing Seeds](docs/features/OTHER.md#shortcuts-reusing-seeds)
+<<<<<<< HEAD
 - [Weighted Prompts](docs/features/PROMPTS.md#weighted-prompts)
 - [Negative/Unconditioned Prompts](docs/features/PROMPTS.md#negative-and-unconditioned-prompts)
+=======
+- [Weighted Prompts](docs/features/OTHER.md#weighted-prompts)
+>>>>>>> toil(docs): readme - remove remaining markdown warts, HTML
 - [Variations](docs/features/VARIATIONS.md)
 - [Personalizing Text-to-Image Generation](docs/features/TEXTUAL_INVERSION.md)
 - [Simplified API for text to image generation](docs/features/OTHER.md#simplified-api)
@@ -147,7 +151,7 @@ dream> -I./images/man.png -D bottom
 ~~~~
 
 
-# Contributing
+### Contributing
 
 Anyone who wishes to contribute to this project, whether documentation, features, bug fixes, code cleanup, testing, or code reviews, is very much encouraged to do so. If you are unfamiliar with
 how to contribute to GitHub projects, here is a [Getting Started Guide](https://opensource.com/article/19/7/create-pull-request-github).
