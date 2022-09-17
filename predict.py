@@ -10,19 +10,7 @@
 
 import random
 
-from pynvml import (nvmlDeviceGetHandleByIndex, nvmlDeviceGetMemoryInfo,
-                    nvmlInit)
-
-
-def print_gpu_info(device_id: int = 0):
-    nvmlInit()
-    h = nvmlDeviceGetHandleByIndex(device_id)
-    info = nvmlDeviceGetMemoryInfo(h)
-    total = info.total / 1024**3
-    free = info.free / 1024**3
-    used = info.used / 1024**3
-    print(f"GPU {device_id}: {used:.2f}/{total:2f}GB used ({free:.2f}GB free)")
-
+from pynvml import nvmlDeviceGetHandleByIndex, nvmlDeviceGetMemoryInfo, nvmlInit
 
 import sys
 
@@ -65,6 +53,31 @@ SAMPLER_CHOICES = [
 #         info.add_text("sd-metadata", json.dumps(metadata_dict))
 #         pil_image.save(image_name, pnginfo=info)
 #         print(f"Saved progress image {image_name} at timestep {step}")
+
+
+def print_gpu_info(device_id: int = 0):
+    nvmlInit()
+    h = nvmlDeviceGetHandleByIndex(device_id)
+    info = nvmlDeviceGetMemoryInfo(h)
+    total = info.total / 1024**3
+    free = info.free / 1024**3
+    used = info.used / 1024**3
+    print(f"GPU {device_id}: {used:.2f}/{total:2f}GB used ({free:.2f}GB free)")
+
+
+def parse_variation_pairs(with_variations):
+    variation_pairs = []
+    for part in with_variations.split(","):
+        seed_and_weight = part.split(":")
+        assert (
+            len(seed_and_weight) == 2
+        ), f"Variation format is `seed:weight,seed:weight` but got {part}"
+        try:
+            seed, weight = int(seed_and_weight[0]), float(seed_and_weight[1])
+        except ValueError:
+            raise ValueError(f"Variation parsing failed for {part}")
+        variation_pairs.append((seed, weight))
+    return variation_pairs
 
 
 class ImageSeedOutput(BaseModel):
@@ -111,12 +124,8 @@ class Predictor(BasePredictor):
             description="Combine two or more variations using format `seed:weight,seed:weight`",
             default=None,
         ),
-        width: int = Input(
-            description="Width of generated image", default=512, le=512, ge=256
-        ),
-        height: int = Input(
-            description="Height of generated image", default=512, le=512, ge=256
-        ),
+        width: int = Input(description="Width of generated image", default=512),
+        height: int = Input(description="Height of generated image", default=512),
         sampler_name: str = Input(
             description="Sampler to use. Ignored when using an init image, which requires ddim sampling in v1.4",
             default="k_lms",
@@ -177,7 +186,12 @@ class Predictor(BasePredictor):
             description="List of tiles by number in order to process and replace onto the image e.g. `0 2 4`",
             default=None,
         ),
-        upscale: str = Input(description="Upscale the generated image", default=None),
+        upscale_strength: float = Input(
+            description="Weight to use when upscaling.", default=None
+        ),
+        upscale_level: int = Input(
+            description="How much to upscale (2x or 4x)", default=None, choices=[2, 4]
+        ),
         skip_normalize: bool = Input(
             description="Skip normalization of the various weighted CLIP embeds",
             default=False,
@@ -187,8 +201,18 @@ class Predictor(BasePredictor):
         """Generate an image from a prompt"""
         if seed <= -1:
             seed = random.randint(0, 2**32 - 1)
-        print_gpu_info()
-        return [
+
+        # setup upscale param by concatenating the strength and level
+        upscale = None
+        if upscale_level is not None and upscale_strength is None:
+            upscale = f"{upscale_level} {upscale_strength}"
+            print(f"Upscale: {upscale}")
+
+        if int(seed) > -1 and with_variations is not None:
+            variation_pairs = parse_variation_pairs(with_variations)
+            print(f"Using variations {variation_pairs}")
+
+        outputs = [
             ImageSeedOutput(image_path=Path(image_path), seed=seed)
             for image_path, seed in self.diffusion_model.prompt2png(
                 prompt,
@@ -206,7 +230,7 @@ class Predictor(BasePredictor):
                 sampler_name=sampler_name,
                 seamless=seamless,
                 log_tokenization=log_tokenization,
-                with_variations=with_variations,
+                with_variations=variation_pairs if len(variation_pairs) > 0 else None,
                 variation_amount=variation_amount,
                 # these are specific to img2img and inpaint
                 init_img=str(init_img) if init_img else None,
@@ -224,3 +248,7 @@ class Predictor(BasePredictor):
                 catch_interrupts=False,
             )
         ]
+        print(f"Generated {len(outputs)} images")
+        print("Max VRAM usage:")
+        print_gpu_info()
+        return outputs
