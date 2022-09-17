@@ -29,6 +29,8 @@ from ldm.dream.pngwriter           import PngWriter
 from ldm.dream.image_util          import InitImageResizer
 from ldm.dream.devices             import choose_torch_device
 from ldm.dream.conditioning        import get_uc_and_c
+# BUG: We need to use the model's downsample factor rather than hardcoding "8"
+from ldm.dream.generator.base import downsampling
 
 def fix_func(orig):
     if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
@@ -609,9 +611,6 @@ class Generate:
 
     def _load_img(self, path, width, height, fit=False):
         assert os.path.exists(path), f'>> {path}: File not found'
-
-        #        with Image.open(path) as img:
-        #            image = img.convert('RGBA')
         image = Image.open(path)
         print(
             f'>> loaded input image of size {image.width}x{image.height} from {path}'
@@ -623,11 +622,6 @@ class Generate:
         return image
 
     def _create_init_image(self,image):
-        image = image.convert('RGB')
-        # print(
-        #     f'>> DEBUG: writing the image to img.png'
-        # )
-        # image.save('img.png')
         image = np.array(image).astype(np.float32) / 255.0
         image = image[None].transpose(0, 3, 1, 2)
         image = torch.from_numpy(image)
@@ -635,16 +629,12 @@ class Generate:
         return image.to(self.device)
 
     def _create_init_mask(self, image):
-        # convert into a black/white mask
+        if not self._has_transparency(image):
+            print('>> WARNING: Couldn\'t find transparency mask in image, adding one')
+            image = image.convert('RGBA')
         image = self._image_to_mask(image)
         image = image.convert('RGB')
-        # BUG: We need to use the model's downsample factor rather than hardcoding "8"
-        from ldm.dream.generator.base import downsampling
         image = image.resize((image.width//downsampling, image.height//downsampling), resample=Image.Resampling.LANCZOS)
-        # print(
-        #     f'>> DEBUG: writing the mask to mask.png'
-        #     )
-        # image.save('mask.png')
         image = np.array(image)
         image = image.astype(np.float32) / 255.0
         image = image[None].transpose(0, 3, 1, 2)
