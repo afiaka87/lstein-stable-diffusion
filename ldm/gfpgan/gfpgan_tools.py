@@ -10,7 +10,9 @@ from ldm.dream.args import Args
 
 opt                 = Args()
 opt.parse_args()
-model_path          = os.path.join(opt.gfpgan_dir, opt.gfpgan_model_path)
+# model_path          = os.path.join(opt.gfpgan_dir, opt.gfpgan_model_path)
+model_path          = os.path.expanduser("~/.cache/gfpgan/experiments/pretrained_models/GFPGANv1.3.pth")
+
 gfpgan_model_exists = os.path.isfile(model_path)
 
 def run_gfpgan(image, strength, seed, upsampler_scale=4):
