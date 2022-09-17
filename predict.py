@@ -231,7 +231,7 @@ class Predictor(BasePredictor):
                 sampler_name=sampler_name,
                 seamless=seamless,
                 log_tokenization=log_tokenization,
-                with_variations=variation_pairs if len(variation_pairs) > 0 else None,
+                with_variations=variation_pairs,
                 variation_amount=variation_amount,
                 # these are specific to img2img and inpaint
                 init_img=str(init_img) if init_img else None,
