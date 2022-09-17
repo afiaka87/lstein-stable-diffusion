@@ -34,35 +34,45 @@ _This repository was formally known as /stable-diffusion_
 5. [Contributing](#contributing)
 6. [Support](#support)
 
-# Installation
+### Installation
 
 This fork is supported across multiple platforms. You can find individual installation instructions below.
 
+<<<<<<< HEAD
 - ## [Linux](docs/installation/INSTALL_LINUX.md)
 - ## [Windows](docs/installation/INSTALL_WINDOWS.md)
 - ## [Macintosh](docs/installation/INSTALL_MAC.md)
 
 ## **Hardware Requirements**
+=======
+- #### [Linux](docs/installation/INSTALL_LINUX.md)
 
-**System**
+- #### [Windows](docs/installation/INSTALL_WINDOWS.md)
+
+- #### [Macintosh](docs/installation/INSTALL_MAC.md)
+
+### Hardware Requirements
+>>>>>>> toil(docs): readme - remove remaining markdown warts, HTML
+
+#### System
 
 You wil need one of the following:
 
 - An NVIDIA-based graphics card with 4 GB or more VRAM memory.
 - An Apple computer with an M1 chip.
 
-**Memory**
+#### Memory
 
 - At least 12 GB Main Memory RAM.
 
-**Disk**
+#### Disk
 
 - At least 6 GB of free disk space for the machine learning model, Python, and all its dependencies.
 
-**Note**
-
-If you are have a Nvidia 10xx series card (e.g. the 1080ti), please
-run the dream script in full-precision mode as shown below.
+> Note
+>
+> If you have an Nvidia 10xx series card (e.g. the 1080ti), please run the dream script in
+> full-precision mode as shown below.
 
 Similarly, specify full-precision mode on Apple M1 hardware.
 
@@ -73,68 +83,30 @@ To run in full-precision mode, start `dream.py` with the
 (ldm) ~/stable-diffusion$ python scripts/dream.py --full_precision
 ```
 
-This will tell the sampler to invest 25% of its effort on the tabby
-cat aspect of the image and 75% on the white duck aspect
-(surprisingly, this example actually works). The prompt weights can
-use any combination of integers and floating point numbers, and they
-do not need to add up to 1.
+### Features
 
-## Thresholding and Perlin Noise Initialization Options
+#### Major Features
 
-Two new options are the thresholding (`--threshold`) and the perlin noise initialization (`--perlin`) options. Thresholding limits the range of the latent values during optimization, which helps combat oversaturation with higher CFG scale values. Perlin noise initialization starts with a percentage (a value ranging from 0 to 1) of perlin noise mixed into the initial noise. Both features allow for more variations and options in the course of generating images.
+- [Interactive Command Line Interface](docs/features/CLI.md)
+- [Image To Image](docs/features/IMG2IMG.md)
+- [Inpainting Support](docs/features/INPAINTING.md)
+- [GFPGAN and Real-ESRGAN Support](docs/features/UPSCALE.md)
+- [Seamless Tiling](docs/features/OTHER.md#seamless-tiling)
+- [Google Colab](docs/features/OTHER.md#google-colab)
+- [Web Server](docs/features/WEB.md)
+- [Reading Prompts From File](docs/features/OTHER.md#reading-prompts-from-a-file)
+- [Shortcut: Reusing Seeds](docs/features/OTHER.md#shortcuts-reusing-seeds)
+- [Weighted Prompts](docs/features/OTHER.md#weighted-prompts)
+- [Variations](docs/features/VARIATIONS.md)
+- [Personalizing Text-to-Image Generation](docs/features/TEXTUAL_INVERSION.md)
+- [Simplified API for text to image generation](docs/features/OTHER.md#simplified-api)
 
-For better intuition into what these options do in practice, [here is a graphic demonstrating them both](static/truncation_comparison.jpg) in use. Perlin noise at initialization is varied going across by 0.0, 0.1, 0.2, 0.4, 0.5, 0.6,, 0.8, 0.9, 1.0; and the threshold is varied going down from 0, 1, 2, 3, 4, 5, 10, 20, 100. The other options are fixed, so the initial prompt is as follows:
+#### Other Features
 
-```
-    a portrait of a beautiful young lady -S 1950357039 -s 100 -C 20 -A k_euler_a --threshold 0 --perlin 0
-```
+- [Creating Transparent Regions for Inpainting](docs/features/INPAINTING.md#creating-transparent-regions-for-inpainting)
+- [Preload Models](docs/features/OTHER.md#preload-models)
 
-Note: currently the thresholding feature is only implemented for the k-diffusion style samplers, and empirically appears to work best with `k_euler_a` and `k_dpm_2_a`. Using 0 disables thresholding. Using 0 for perlin noise disables using perlin noise for initialization. Finally, using 1 for perlin noise uses only perlin noise for initialization.
-
-## Personalizing Text-to-Image Generation
-
-You may personalize the generated images to provide your own styles or objects by training a new LDM checkpoint
-and introducing a new vocabulary to the fixed model.
-
-## **Major Features**
-
-- ## [Interactive Command Line Interface](docs/features/CLI.md)
-
-- ## [Image To Image](docs/features/IMG2IMG.md)
-
-- ## [Inpainting Support](docs/features/INPAINTING.md)
-
-- ## [GFPGAN and Real-ESRGAN Support](docs/features/UPSCALE.md)
-
-- ## [Embiggen upscaling](docs/features/EMBIGGEN.md)
-
-- ## [Seamless Tiling](docs/features/OTHER.md#seamless-tiling)
-
-- ## [Google Colab](docs/features/OTHER.md#google-colab)
-
-- ## [Web Server](docs/features/WEB.md)
-
-- ## [Reading Prompts From File](docs/features/OTHER.md#reading-prompts-from-a-file)
-
-- ## [Shortcut: Reusing Seeds](docs/features/OTHER.md#shortcuts-reusing-seeds)
-
-- ## [Weighted Prompts](docs/features/OTHER.md#weighted-prompts)
-
-- ## [Thresholding and Perlin Noise Initialization Options](/docs/features/OTHER.md#thresholding-and-perlin-noise-initialization-options)
-
-- ## [Variations](docs/features/VARIATIONS.md)
-
-- ## [Personalizing Text-to-Image Generation](docs/features/TEXTUAL_INVERSION.md)
-
-- ## [Simplified API for text to image generation](docs/features/OTHER.md#simplified-api)
-
-## **Other Features**
-
-- ### [Creating Transparent Regions for Inpainting](docs/features/INPAINTING.md#creating-transparent-regions-for-inpainting)
-
-- ### [Preload Models](docs/features/OTHER.md#preload-models)
-
-# Latest Changes
+### Latest Changes
 
 - v1.14 (11 September 2022)
 
@@ -160,25 +132,41 @@ and introducing a new vocabulary to the fixed model.
 
 For older changelogs, please visit **[CHANGELOGS](docs/CHANGELOG.md)**. 
 
+<<<<<<< HEAD
 # Troubleshooting
+=======
+### Troubleshooting
+>>>>>>> toil(docs): readme - remove remaining markdown warts, HTML
 
 Please check out our **[Q&A](docs/help/TROUBLESHOOT.md)** to get solutions for common installation problems and other issues.
 
+<<<<<<< HEAD
 # Contributing
+=======
+### Contributing
+>>>>>>> toil(docs): readme - remove remaining markdown warts, HTML
 
 Anyone who wishes to contribute to this project, whether documentation, features, bug fixes, code cleanup, testing, or code reviews, is very much encouraged to do so. If you are unfamiliar with
 how to contribute to GitHub projects, here is a [Getting Started Guide](https://opensource.com/article/19/7/create-pull-request-github).
 
 A full set of contribution guidelines, along with templates, are in progress, but for now the most important thing is to **make your pull request against the "development" branch**, and not against "main". This will help keep public breakage to a minimum and will allow you to propose more radical changes.
 
+<<<<<<< HEAD
 ## **Contributors**
+=======
+### Contributors
+>>>>>>> toil(docs): readme - remove remaining markdown warts, HTML
 
 This fork is a combined effort of various people from across the
 world. [Check out the list of all these amazing
 people](docs/CONTRIBUTORS.md). We thank them for their time, hard work
 and effort.
 
+<<<<<<< HEAD
 # Support
+=======
+### Support
+>>>>>>> toil(docs): readme - remove remaining markdown warts, HTML
 
 For support,
 please use this repository's GitHub Issues tracking service. Feel free
@@ -186,7 +174,11 @@ to send me an email if you use and like the script.
 
 Original portions of the software are Copyright (c) 2020 Lincoln D. Stein (https://github.com/lstein)
 
+<<<<<<< HEAD
 # Further Reading
+=======
+### Further Reading
+>>>>>>> toil(docs): readme - remove remaining markdown warts, HTML
 
 Please see the original README for more information on this software
 and underlying algorithm, located in the file [README-CompViz.md](docs/README-CompViz.md).
