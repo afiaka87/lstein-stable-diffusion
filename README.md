@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <h1 align='center'><b>InvokeAI: A Stable Diffusion Toolkit</b></h1>
 
 <p align='center'>
@@ -18,6 +19,42 @@ the open source text-to-image generator. It provides a streamlined
 process with various new features and options to aid the image
 generation process. It runs on Windows, Mac and Linux machines,
 and runs on GPU cards with as little as 4 GB or RAM.
+=======
+<div align="center">
+
+# Stable Diffusion Dream Script
+
+![project logo](docs/assets/logo.png)
+
+[![latest release badge]][latest release link] [![github stars badge]][github stars link] [![github forks badge]][github forks link]
+
+[![CI checks on main badge]][CI checks on main link] [![CI checks on dev badge]][CI checks on dev link] [![latest commit to dev badge]][latest commit to dev link]
+
+[![github open issues badge]][github open issues link] [![github open prs badge]][github open prs link]
+
+[CI checks on dev badge]: https://flat.badgen.net/github/checks/lstein/stable-diffusion/development?label=CI%20status%20on%20dev&cache=900&icon=github
+[CI checks on dev link]: https://github.com/lstein/stable-diffusion/actions?query=branch%3Adevelopment
+[CI checks on main badge]: https://flat.badgen.net/github/checks/lstein/stable-diffusion/main?label=CI%20status%20on%20main&cache=900&icon=github
+[CI checks on main link]: https://github.com/lstein/stable-diffusion/actions?query=branch%3Amain
+[github forks badge]: https://flat.badgen.net/github/forks/lstein/stable-diffusion?icon=github
+[github forks link]: https://useful-forks.github.io/?repo=lstein%2Fstable-diffusion
+[github open issues badge]: https://flat.badgen.net/github/open-issues/lstein/stable-diffusion?icon=github
+[github open issues link]: https://github.com/lstein/stable-diffusion/issues?q=is%3Aissue+is%3Aopen
+[github open prs badge]: https://flat.badgen.net/github/open-prs/lstein/stable-diffusion?icon=github
+[github open prs link]: https://github.com/lstein/stable-diffusion/pulls?q=is%3Apr+is%3Aopen
+[github stars badge]: https://flat.badgen.net/github/stars/lstein/stable-diffusion?icon=github
+[github stars link]: https://github.com/lstein/stable-diffusion/stargazers
+[latest commit to dev badge]: https://flat.badgen.net/github/last-commit/lstein/stable-diffusion/development?icon=github&color=yellow&label=last%20dev%20commit&cache=900
+[latest commit to dev link]: https://github.com/lstein/stable-diffusion/commits/development
+[latest release badge]: https://flat.badgen.net/github/release/lstein/stable-diffusion/development?icon=github
+[latest release link]: https://github.com/lstein/stable-diffusion/releases
+</div>
+
+This is a fork of [CompVis/stable-diffusion](https://github.com/CompVis/stable-diffusion), the open
+source text-to-image generator. It provides a streamlined process with various new features and
+options to aid the image generation process. It runs on Windows, Mac and Linux machines, and runs on
+GPU cards with as little as 4 GB or RAM.
+>>>>>>> fix(doc): readme - more meaningful CI links from badges (#645)
 
 _Note: This fork is rapidly evolving. Please use the
 [Issues](https://github.com/invoke-ai/InvokeAI/issues) tab to
@@ -38,13 +75,6 @@ _This repository was formally known as /stable-diffusion_
 
 This fork is supported across multiple platforms. You can find individual installation instructions below.
 
-<<<<<<< HEAD
-- ## [Linux](docs/installation/INSTALL_LINUX.md)
-- ## [Windows](docs/installation/INSTALL_WINDOWS.md)
-- ## [Macintosh](docs/installation/INSTALL_MAC.md)
-
-## **Hardware Requirements**
-=======
 - #### [Linux](docs/installation/INSTALL_LINUX.md)
 
 - #### [Windows](docs/installation/INSTALL_WINDOWS.md)
@@ -52,7 +82,6 @@ This fork is supported across multiple platforms. You can find individual instal
 - #### [Macintosh](docs/installation/INSTALL_MAC.md)
 
 ### Hardware Requirements
->>>>>>> toil(docs): readme - remove remaining markdown warts, HTML
 
 #### System
 
@@ -132,41 +161,25 @@ To run in full-precision mode, start `dream.py` with the
 
 For older changelogs, please visit **[CHANGELOGS](docs/CHANGELOG.md)**. 
 
-<<<<<<< HEAD
-# Troubleshooting
-=======
 ### Troubleshooting
->>>>>>> toil(docs): readme - remove remaining markdown warts, HTML
 
 Please check out our **[Q&A](docs/help/TROUBLESHOOT.md)** to get solutions for common installation problems and other issues.
 
-<<<<<<< HEAD
-# Contributing
-=======
 ### Contributing
->>>>>>> toil(docs): readme - remove remaining markdown warts, HTML
 
 Anyone who wishes to contribute to this project, whether documentation, features, bug fixes, code cleanup, testing, or code reviews, is very much encouraged to do so. If you are unfamiliar with
 how to contribute to GitHub projects, here is a [Getting Started Guide](https://opensource.com/article/19/7/create-pull-request-github).
 
 A full set of contribution guidelines, along with templates, are in progress, but for now the most important thing is to **make your pull request against the "development" branch**, and not against "main". This will help keep public breakage to a minimum and will allow you to propose more radical changes.
 
-<<<<<<< HEAD
-## **Contributors**
-=======
 ### Contributors
->>>>>>> toil(docs): readme - remove remaining markdown warts, HTML
 
 This fork is a combined effort of various people from across the
 world. [Check out the list of all these amazing
 people](docs/CONTRIBUTORS.md). We thank them for their time, hard work
 and effort.
 
-<<<<<<< HEAD
-# Support
-=======
 ### Support
->>>>>>> toil(docs): readme - remove remaining markdown warts, HTML
 
 For support,
 please use this repository's GitHub Issues tracking service. Feel free
@@ -174,11 +187,7 @@ to send me an email if you use and like the script.
 
 Original portions of the software are Copyright (c) 2020 Lincoln D. Stein (https://github.com/lstein)
 
-<<<<<<< HEAD
-# Further Reading
-=======
 ### Further Reading
->>>>>>> toil(docs): readme - remove remaining markdown warts, HTML
 
 Please see the original README for more information on this software
 and underlying algorithm, located in the file [README-CompViz.md](docs/README-CompViz.md).
