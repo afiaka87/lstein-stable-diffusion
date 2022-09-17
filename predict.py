@@ -208,6 +208,7 @@ class Predictor(BasePredictor):
             upscale = f"{upscale_level} {upscale_strength}"
             print(f"Upscale: {upscale}")
 
+        variation_pairs = None
         if int(seed) > -1 and with_variations is not None:
             variation_pairs = parse_variation_pairs(with_variations)
             print(f"Using variations {variation_pairs}")
