@@ -297,14 +297,13 @@ class Generate:
             (embiggen == None and embiggen_tiles == None) or ((embiggen != None or embiggen_tiles != None) and init_img != None)
         ), 'Embiggen requires an init/input image to be specified'
 
-        if len(with_variations) > 0 or variation_amount > 1.0:
+        if len(with_variations) > 0:
             assert seed is not None,\
                 'seed must be specified when using with_variations'
             if variation_amount == 0.0:
-                assert iterations == 1,\
-                    'when using --with_variations, multiple iterations are only possible when using --variation_amount'
-            assert all(0 <= weight <= 1 for _, weight in with_variations),\
-                f'variation weights must be in [0.0, 1.0]: got {[weight for _, weight in with_variations]}'
+                assert iterations == 1, 'when using --with_variations, multiple iterations are only possible when using --variation_amount'
+                assert all(0 <= weight <= 1 for _, weight in with_variations),\
+                    f'variation weights must be in [0.0, 1.0]: got {[weight for _, weight in with_variations]}'
 
         width, height, _ = self._resolution_check(width, height, log=True)
 
