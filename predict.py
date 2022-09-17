@@ -79,7 +79,6 @@ def parse_variation_pairs(with_variations):
         variation_pairs.append((seed, weight))
     return variation_pairs
 
-
 class ImageSeedOutput(BaseModel):
     image_path: Path
     seed: Optional[int]
@@ -212,7 +211,7 @@ class Predictor(BasePredictor):
         if int(seed) > -1 and with_variations is not None:
             variation_pairs = parse_variation_pairs(with_variations)
             print(f"Using variations {variation_pairs}")
-
+        
         outputs = [
             ImageSeedOutput(image_path=Path(image_path), seed=seed)
             for image_path, seed in self.diffusion_model.prompt2png(
@@ -243,7 +242,7 @@ class Predictor(BasePredictor):
                 embiggen_tiles=embiggen_tiles,
                 # these are specific to GFPGAN/ESRGAN
                 gfpgan_strength=gfpgan_strength,
-                # save_original=True,
+                # save_original=True, deprecated (doesnt even get used)
                 upscale=upscale,
                 # Set this True to handle KeyboardInterrupt internally
                 catch_interrupts=False,
