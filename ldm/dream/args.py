@@ -132,6 +132,7 @@ class Args(object):
         try:
             elements = shlex.split(command)
         except ValueError:
+            import sys, traceback
             print(traceback.format_exc(), file=sys.stderr)
             return
         switches = ['']
