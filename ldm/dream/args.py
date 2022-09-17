@@ -61,6 +61,8 @@ import json
 import hashlib
 import os
 import copy
+import sys
+import traceback
 from ldm.dream.conditioning import split_weighted_subprompts
 
 SAMPLER_CHOICES = [
@@ -333,7 +335,7 @@ class Args(object):
         postprocessing_group.add_argument(
             '--gfpgan_dir',
             type=str,
-            default='./src/gfpgan',
+            default=os.path.expanduser('~/.cache/gfpgan'),
             help='Indicates the directory containing the GFPGAN code.',
         )
         web_server_group.add_argument(
