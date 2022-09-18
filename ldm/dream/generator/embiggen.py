@@ -37,9 +37,16 @@ class Embiggen(Generator):
         Returns a function returning an image derived from the prompt and multi-stage twice-baked potato layering over the img2img on the initial image
         Return value depends on the seed at the time you call it
         """
+
         # Construct embiggen arg array, and sanity check arguments
         if embiggen == None: # embiggen can also be called with just embiggen_tiles
             embiggen = [1.0] # If not specified, assume no scaling
+        elif isinstance(embiggen, str):
+            try:
+                embiggen = [float(x) for x in embiggen.split(" ")]
+            except ValueError:
+                print(f"Invalid embiggen arguments: {embiggen}")
+                raise
         elif embiggen[0] < 0 :
             embiggen[0] = 1.0
             print('>> Embiggen scaling factor cannot be negative, fell back to the default of 1.0 !')
@@ -56,6 +63,13 @@ class Embiggen(Generator):
 
         # Convert tiles from their user-freindly count-from-one to count-from-zero, because we need to do modulo math
         # and then sort them, because... people.
+        if isinstance(embiggen_tiles, str):
+            try:
+                embiggen_tiles = [int(x) - 1 for x in embiggen_tiles.split(" ")]
+            except ValueError:
+                print(f"Invalid embiggen_tiles arguments: {embiggen_tiles}")
+                raise
+        
         if embiggen_tiles:
             embiggen_tiles = list(map(lambda n: n-1, embiggen_tiles))
             embiggen_tiles.sort()
