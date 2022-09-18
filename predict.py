@@ -79,6 +79,7 @@ def parse_variation_pairs(with_variations):
         variation_pairs.append((seed, weight))
     return variation_pairs
 
+
 class ImageSeedOutput(BaseModel):
     image_path: Path
     seed: Optional[int]
@@ -108,13 +109,22 @@ class Predictor(BasePredictor):
     def predict(
         self,
         prompt: str = Input(description="Prompt text", default=None),
-        iterations: int = Input(description="Iterations/image-count", default=4),
-        steps: int = Input(
-            description="Refinement steps per iteration", default=50, le=500, ge=5
+        # init image settings
+        init_img: Path = Input(
+            description="(init_img) an initial image to use", default=None
         ),
-        seed: int = Input(
-            description="Seed for random number generator, use -1 for a random seed.",
-            default=-1,
+        init_mask: Path = Input(
+            description="(init_img) an initial mask to use", default=None
+        ),
+        init_strength: float = Input(
+            description="(init_img) Strength, 0.0 preserves image exactly, 1.0 replaces it completely",
+            default=0.0,
+            le=1.0,
+            ge=0.0,
+        ),
+        fit: bool = Input(
+            description="(init_img) Fit the generated image to the initial image",
+            default=False,
         ),
         variation_amount: float = Input(
             description="Variation amount", default=0.0, le=1.0, ge=0.0
@@ -122,6 +132,10 @@ class Predictor(BasePredictor):
         with_variations: str = Input(
             description="Combine two or more variations using format `seed:weight,seed:weight`",
             default=None,
+        ),
+        num_images: int = Input(description="Iterations/image-count", default=4),
+        steps: int = Input(
+            description="Denoising steps per each generation", default=50, le=500, ge=5
         ),
         width: int = Input(description="Width of generated image", default=512),
         height: int = Input(description="Height of generated image", default=512),
@@ -148,37 +162,14 @@ class Predictor(BasePredictor):
         seamless: bool = Input(
             description="Whether the generated image should tile", default=False
         ),
-        # init image settings
-        init_img: Path = Input(
-            description="(init_img) an initial image to use", default=None
-        ),
-        init_mask: Path = Input(
-            description="(init_img) an initial mask to use", default=None
-        ),
-        fit: bool = Input(
-            description="(init_img) Fit the generated image to the initial image",
-            default=False,
-        ),
-        strength: float = Input(
-            description="(init_img) Strength, 0.0 preserves image exactly, 1.0 replaces it completely",
-            default=0.0,
-            le=1.0,
-            ge=0.0,
-        ),
         gfpgan_strength: float = Input(
             description="Strength for GFPGAN. 0.0 preserves image exactly, 1.0 replaces it completely",
             default=0.0,
             le=1.0,
             ge=0.0,
         ),
-        ddim_eta: float = Input(
-            description="Image randomness (eta=0.0 means the same seed always produces the same image)",
-            default=0.0,
-            le=1.0,
-            ge=0.0,
-        ),
         embiggen: str = Input(
-            description="Scale factor relative to the size of the --init_img (-I), followed by ESRGAN upscaling strength (0-1.0), followed by minimum amount of overlap between tiles as a decimal ratio (0 - 1.0) or number of pixels",
+            description="(e.g. '4 0.75 .02') Scale factor, upscaling strength (0-1.0), followed by minimum amount of overlap between tiles as a decimal ratio (0 - 1.0)",
             default=None,
         ),
         embiggen_tiles: str = Input(
@@ -186,20 +177,26 @@ class Predictor(BasePredictor):
             default=None,
         ),
         upscale_strength: float = Input(
-            description="Weight to use when upscaling.", default=None
+            description="Weight for ESRGAN upscaling.", default=None, le=1.0, ge=0.0
         ),
         upscale_level: int = Input(
-            description="How much to upscale (2x or 4x)", default=None, choices=[2, 4]
+            description="How much to upscale (2x or 4x) with ESRGAN",
+            default=None,
+            choices=[2, 4],
         ),
-        skip_normalize: bool = Input(
-            description="Skip normalization of the various weighted CLIP embeds",
-            default=False,
+        seed: int = Input(
+            description="Seed for random number generator, use -1 for a random seed.",
+            default=-1,
         ),
-        log_tokenization: bool = Input(description="Log tokenization", default=False),
     ) -> List[ImageSeedOutput]:
         """Generate an image from a prompt"""
         if seed <= -1:
             seed = random.randint(0, 2**32 - 1)
+
+        if embiggen is not None or embiggen_tiles is not None:
+            assert (
+                init_img is not None
+            ), "Must provide an initial image when using embiggen"
 
         # setup upscale param by concatenating the strength and level
         upscale = None
@@ -211,32 +208,29 @@ class Predictor(BasePredictor):
         if int(seed) > -1 and with_variations is not None:
             variation_pairs = parse_variation_pairs(with_variations)
             print(f"Using variations {variation_pairs}")
-        
+
         outputs = [
             ImageSeedOutput(image_path=Path(image_path), seed=seed)
             for image_path, seed in self.diffusion_model.prompt2png(
                 prompt,
                 outdir=self.current_outdir,
-                iterations=iterations,
+                iterations=num_images,
                 steps=steps,
                 seed=seed,
                 cfg_scale=cfg_scale,
-                ddim_eta=ddim_eta,
-                skip_normalize=skip_normalize,
                 # image_callback=None,
                 # step_callback=image_progress,
                 width=width,
                 height=height,
                 sampler_name=sampler_name,
                 seamless=seamless,
-                log_tokenization=log_tokenization,
                 with_variations=variation_pairs,
                 variation_amount=variation_amount,
                 # these are specific to img2img and inpaint
                 init_img=str(init_img) if init_img else None,
                 init_mask=str(init_mask) if init_mask else None,
                 fit=fit,
-                strength=strength,
+                strength=init_strength,
                 # these are specific to embiggen (which also relies on img2img args)
                 embiggen=embiggen,
                 embiggen_tiles=embiggen_tiles,
