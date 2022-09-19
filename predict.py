@@ -125,15 +125,26 @@ class Predictor(BasePredictor):
             default=None,
             ge=0,
         ),
+        with_variations: str = Input(
+            description="Combine two or more variations using format `seed:weight,seed:weight,seed:weight`",
+            default=None,
+        ),
         variation_amount: float = Input(
             description="Variation amount. Specifies how different variations will look.",
             default=0.0,
             le=1.0,
             ge=0.0,
         ),
-        with_variations: str = Input(
-            description="(optional) Combine two or more variations using format `seed:weight,seed:weight,seed:weight`",
-            default=None,
+        threshold: float = Input(
+            description="Optional value >=0 to add thresholding to latent values for k-diffusion samplers (0 disables)",
+            default=0.0,
+            ge=0.0,
+        ),
+        perlin: float = Input(
+            description="Optional 0-1 value to add a percentage of perlin noise to the initial noise",
+            default=0.0,
+            le=1.0,
+            ge=0.0,
         ),
         num_images: int = Input(description="Iterations/image-count", default=1),
         steps: int = Input(
@@ -288,6 +299,8 @@ class Predictor(BasePredictor):
                 fit=init_fit,
                 variation_amount=variation_amount,
                 with_variations=variation_pairs,
+                threshold=threshold,
+                perlin=perlin,
                 iterations=num_images,
                 steps=steps,
                 width=width,
