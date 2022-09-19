@@ -265,11 +265,12 @@ class Predictor(BasePredictor):
                     embedding_path, False
                 )  # path, precision?
 
+            out_direction = []
             if outpaint_direction is not None:
                 assert (
                     init_img is not None
                 ), "Must provide an initial image when using outpaint_direction"
-                out_direction = [outpaint_direction]
+                out_direction.append(outpaint_direction)
                 if outpaint_pixels is not None:
                     out_direction.append(outpaint_pixels)
 
