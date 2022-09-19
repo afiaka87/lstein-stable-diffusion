@@ -102,13 +102,13 @@ class Predictor(BasePredictor):
             description="(init_img) an initial mask to use", default=None
         ),
         init_strength: float = Input(
-            description="(init_img) Strength, 0.0 preserves image exactly, 1.0 replaces it completely",
-            default=0.75,
+            description="(init_img/outpaint) Strength, 0.0 preserves image exactly, 1.0 replaces it completely. defaults to 0.75 (0.83 when outpainting).",
+            default=None,
             le=1.0,
             ge=0.0,
         ),
         init_fit: bool = Input(
-            description="(init_img) Fit the generated image to the initial image",
+            description="(init_img) Resize the image to the model dimensions. Default to False.",
             default=False,
         ),
         init_color: Path = Input(
@@ -177,7 +177,7 @@ class Predictor(BasePredictor):
         ),
         codeformer_fidelity: float = Input(
             description="Takes values between 0 and 1. 0 produces high quality but low accuracy. 1 produces high accuracy but low quality.",
-            default=0.75,
+            default=0.86,
             le=1.0,
             ge=0.0,
         ),
@@ -211,6 +211,13 @@ class Predictor(BasePredictor):
         ),
     ) -> List[ImageSeedOutput]:
         """Generate an image from a prompt"""
+
+
+        if init_strength is None:
+            if outpaint_direction is not None:
+                init_strength = 0.83 # default for outpainting
+            else:
+                init_strength = 0.75 # default for all other cases
 
         if command_mode or prompt.startswith("!dream"):
             dream_args = Args()
