@@ -224,10 +224,10 @@ class Generate:
             fit              = False,
             strength         = None,
             init_color       = None,
+            out_direction  =    None, # outpaint direction
             # these are specific to embiggen (which also relies on img2img args)
             embiggen       =    None,
             embiggen_tiles =    None,
-            out_direction  =    None,
             # these are specific to GFPGAN/ESRGAN
             facetool         = None,
             gfpgan_strength  = 0,
@@ -236,7 +236,7 @@ class Generate:
             upscale          = None,
             # Set this True to handle KeyboardInterrupt internally
             catch_interrupts = False,
-            gfpgan_dir       = "/src/ldm/gfpgan/experiments/pretrained_models",
+            gfpgan_dir       = "/src/ldm/gfpgan/experiments/pretrained_models", # TODO
             **args,
     ):   # eat up additional cruft
         """
@@ -252,6 +252,7 @@ class Generate:
            seamless                        // whether the generated image should tile
            init_img                        // path to an initial image
            strength                        // strength for noising/unnoising init_img. 0.0 preserves image exactly, 1.0 replaces it completely
+           out_direction                   // Direction and pixels to move when outpainting. 'bottom', 'top', 'left', 'right'. Also accepts space-delimited pixels parameters (half of image size by default).
            gfpgan_strength                 // strength for GFPGAN. 0.0 preserves image exactly, 1.0 replaces it completely
            ddim_eta                        // image randomness (eta=0.0 means the same seed always produces the same image)
            step_callback                   // a function or method that will be called each step
