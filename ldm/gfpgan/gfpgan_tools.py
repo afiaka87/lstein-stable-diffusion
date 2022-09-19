@@ -5,55 +5,53 @@ import sys
 import numpy as np
 
 from PIL import Image
-#from scripts.dream import create_argv_parser
+
+# from scripts.dream import create_argv_parser
 from ldm.dream.args import Args
 
-opt                 = Args()
+opt = Args()
 opt.parse_args()
-model_path          = os.path.join(opt.gfpgan_dir, opt.gfpgan_model_path)
-gfpgan_model_exists = os.path.isfile(model_path)
+opt.gfpgan_dir = os.path.expanduser("~/.cache/gfpgan/")
+opt.gfpgan_model_path = "experiments/pretrained_models/GFPGANv1.3.pth"
+assert opt.gfpgan_dir is not None, "GFPGAN directory not specified"
+model_path = os.path.join(opt.gfpgan_dir, opt.gfpgan_model_path)
+gfpgan_model_exists = os.path.exists(model_path)
+assert gfpgan_model_exists, "GFPGAN model not found"
+
 
 def run_gfpgan(image, strength, seed, upsampler_scale=4):
-    print(f'>> GFPGAN - Restoring Faces for image seed:{seed}')
+    print(f">> GFPGAN - Restoring Faces for image seed:{seed}")
     gfpgan = None
     with warnings.catch_warnings():
-        warnings.filterwarnings('ignore', category=DeprecationWarning)
-        warnings.filterwarnings('ignore', category=UserWarning)
-        
-        try:
-            if not gfpgan_model_exists:
-                raise Exception('GFPGAN model not found at path ' + model_path)
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
+        warnings.filterwarnings("ignore", category=UserWarning)
 
-            sys.path.append(os.path.abspath(opt.gfpgan_dir))
-            from gfpgan import GFPGANer
+        assert gfpgan_model_exists, "GFPGAN model not found"
 
-            bg_upsampler = _load_gfpgan_bg_upsampler(
-                opt.gfpgan_bg_upsampler, upsampler_scale, opt.gfpgan_bg_tile
-            )
+        sys.path.append(os.path.abspath(opt.gfpgan_dir))
+        from gfpgan import GFPGANer
 
-            gfpgan = GFPGANer(
-                model_path=model_path,
-                upscale=upsampler_scale,
-                arch='clean',
-                channel_multiplier=2,
-                bg_upsampler=bg_upsampler,
-            )
-        except Exception:
-            import traceback
+        bg_upsampler = _load_gfpgan_bg_upsampler(
+            opt.gfpgan_bg_upsampler, upsampler_scale, opt.gfpgan_bg_tile
+        )
 
-            print('>> Error loading GFPGAN:', file=sys.stderr)
-            print(traceback.format_exc(), file=sys.stderr)
+        gfpgan = GFPGANer(
+            model_path=model_path,
+            upscale=upsampler_scale,
+            arch="clean",
+            channel_multiplier=2,
+            bg_upsampler=bg_upsampler,
+        )
 
     if gfpgan is None:
+        print(f">> WARNING: GFPGAN not initialized.")
         print(
-            f'>> WARNING: GFPGAN not initialized.'
-        )
-        print(
-            f'>> Download https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth to {model_path}, \nor change GFPGAN directory with --gfpgan_dir.'
+            f">> Download https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth to {model_path}, \nor change GFPGAN directory with --gfpgan_dir."
         )
         return image
 
-    image = image.convert('RGB')
+    if image.mode != "RGB":
+        image = image.convert("RGB")
 
     cropped_faces, restored_faces, restored_img = gfpgan.enhance(
         np.array(image, dtype=np.uint8),
@@ -77,15 +75,15 @@ def run_gfpgan(image, strength, seed, upsampler_scale=4):
 
 
 def _load_gfpgan_bg_upsampler(bg_upsampler, upsampler_scale, bg_tile=400):
-    if bg_upsampler == 'realesrgan':
-        if not torch.cuda.is_available(): # CPU or MPS on M1
+    if bg_upsampler == "realesrgan":
+        if not torch.cuda.is_available():  # CPU or MPS on M1
             use_half_precision = False
         else:
             use_half_precision = True
 
         model_path = {
-            2: 'https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth',
-            4: 'https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth',
+            2: "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth",
+            4: "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth",
         }
 
         if upsampler_scale not in model_path:
@@ -129,40 +127,24 @@ def _load_gfpgan_bg_upsampler(bg_upsampler, upsampler_scale, bg_tile=400):
 
 
 def real_esrgan_upscale(image, strength, upsampler_scale, seed):
-    print(
-        f'>> Real-ESRGAN Upscaling seed:{seed} : scale:{upsampler_scale}x'
-    )
+    print(f">> Real-ESRGAN Upscaling seed:{seed} : scale:{upsampler_scale}x")
 
     with warnings.catch_warnings():
-        warnings.filterwarnings('ignore', category=DeprecationWarning)
-        warnings.filterwarnings('ignore', category=UserWarning)
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
+        warnings.filterwarnings("ignore", category=UserWarning)
 
-        try:
-            upsampler = _load_gfpgan_bg_upsampler(
-                opt.gfpgan_bg_upsampler, upsampler_scale, opt.gfpgan_bg_tile
-            )
-        except Exception:
-            import traceback
-
-            print('>> Error loading Real-ESRGAN:', file=sys.stderr)
-            print(traceback.format_exc(), file=sys.stderr)
-
+        upsampler = _load_gfpgan_bg_upsampler(
+            opt.gfpgan_bg_upsampler, upsampler_scale, opt.gfpgan_bg_tile
+        )
     output, img_mode = upsampler.enhance(
         np.array(image, dtype=np.uint8),
         outscale=upsampler_scale,
         alpha_upsampler=opt.gfpgan_bg_upsampler,
     )
-
     res = Image.fromarray(output)
-
     if strength < 1.0:
         # Resize the image to the new image if the sizes have changed
         if output.size != image.size:
             image = image.resize(res.size)
         res = Image.blend(image, res, strength)
-
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
-    upsampler = None
-
     return res

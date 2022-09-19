@@ -31,6 +31,8 @@ from ldm.dream.pngwriter           import PngWriter
 from ldm.dream.image_util          import InitImageResizer
 from ldm.dream.devices             import choose_torch_device
 from ldm.dream.conditioning        import get_uc_and_c
+# BUG: We need to use the model's downsample factor rather than hardcoding "8"
+from ldm.dream.generator.base import downsampling
 
 def fix_func(orig):
     if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
@@ -67,9 +69,7 @@ gr.load_model()
 # Will call load_model() if the model was not previously loaded and so
 # may be slow at first.
 # The method returns a list of images. Each row of the list is a sub-list of [filename,seed]
-results = gr.prompt2png(prompt     = "an astronaut riding a horse",
-                         outdir     = "./outputs/samples",
-                         iterations = 3)
+results = gr.prompt2png(prompt     = "an astronaut riding a horse", outdir     = "./outputs/samples", iterations = 3)
 
 for row in results:
     print(f'filename={row[0]}')
@@ -182,8 +182,7 @@ class Generate:
         outputs   = []
         for image, seed in results:
             name = f'{prefix}.{seed}.png'
-            path = pngwriter.save_image_and_prompt_to_png(
-                image, dream_prompt=f'{prompt} -S{seed}', name=name)
+            path = pngwriter.save_image_and_prompt_to_png(image=image, dream_prompt=f'{prompt} -S{seed}', metadata={'seed': seed}, name=name)
             outputs.append([path, seed])
         return outputs
 
@@ -237,6 +236,7 @@ class Generate:
             upscale          = None,
             # Set this True to handle KeyboardInterrupt internally
             catch_interrupts = False,
+            gfpgan_dir       = "/src/ldm/gfpgan/experiments/pretrained_models",
             **args,
     ):   # eat up additional cruft
         """
@@ -313,14 +313,13 @@ class Generate:
             (embiggen == None and embiggen_tiles == None) or ((embiggen != None or embiggen_tiles != None) and init_img != None)
         ), 'Embiggen requires an init/input image to be specified'
 
-        if len(with_variations) > 0 or variation_amount > 1.0:
+        if len(with_variations) > 0:
             assert seed is not None,\
                 'seed must be specified when using with_variations'
             if variation_amount == 0.0:
-                assert iterations == 1,\
-                    'when using --with_variations, multiple iterations are only possible when using --variation_amount'
-            assert all(0 <= weight <= 1 for _, weight in with_variations),\
-                f'variation weights must be in [0.0, 1.0]: got {[weight for _, weight in with_variations]}'
+                assert iterations == 1, 'when using --with_variations, multiple iterations are only possible when using --variation_amount'
+                assert all(0 <= weight <= 1 for _, weight in with_variations),\
+                    f'variation weights must be in [0.0, 1.0]: got {[weight for _, weight in with_variations]}'
 
         width, height, _ = self._resolution_check(width, height, log=True)
 
@@ -384,13 +383,14 @@ class Generate:
                                     image_callback       = image_callback)
 
             if upscale is not None or gfpgan_strength > 0:
-                self.upscale_and_reconstruct(results,
+                self.upscale_and_reconstruct(image_list     = results,
                                              upscale        = upscale,
                                              facetool       = facetool,
                                              strength       = gfpgan_strength,
                                              codeformer_fidelity = codeformer_fidelity,
                                              save_original  = save_original,
-                                             image_callback = image_callback)
+                                             image_callback = image_callback,
+                                             gfpgan_dir     = gfpgan_dir)
 
         except RuntimeError as e:
             print(traceback.format_exc(), file=sys.stderr)
@@ -528,8 +528,9 @@ class Generate:
                                 upscale       = None,
                                 strength      =  0.0,
                                 codeformer_fidelity = 0.75,
-                                save_original = False,
-                                image_callback = None):
+                                save_original = False, # TODO deprecated
+                                image_callback= None,
+                                gfpgan_dir    = None):
         try:
             if upscale is not None:
                 from ldm.gfpgan.gfpgan_tools import real_esrgan_upscale
@@ -545,27 +546,26 @@ class Generate:
             
         for r in image_list:
             image, seed = r
-            try:
-                if upscale is not None:
-                    if len(upscale) < 2:
-                        upscale.append(0.75)
-                    image = real_esrgan_upscale(
-                        image,
-                        upscale[1],
-                        int(upscale[0]),
-                        seed,
-                    )
-                if strength > 0:
-                    if facetool == 'codeformer':
-                        image = CodeFormerRestoration().process(image=image, strength=strength, device=self.device, seed=seed, fidelity=codeformer_fidelity)
-                    else:
-                        image = run_gfpgan(
-                            image, strength, seed, 1
-                        )
-            except Exception as e:
-                print(
-                    f'>> Error running RealESRGAN or GFPGAN. Your image was not upscaled.\n{e}'
+            if upscale is not None:
+                if len(upscale) < 2:
+                    upscale.append(0.75)
+                image = real_esrgan_upscale(
+                    image=image,
+                    strength=upscale[1],
+                    upsampler_scale=int(upscale[0]),
+                    seed=seed,
                 )
+            if strength > 0:
+                if facetool == 'codeformer':
+                    image = CodeFormerRestoration().process(image=image, strength=strength, device=self.device, seed=seed, fidelity=codeformer_fidelity)
+                else:
+                    image = run_gfpgan(
+                        image=image,
+                        strength=strength,
+                        seed=seed,
+                        upsampler_scale=1,
+                        gfpgan_dir=gfpgan_dir
+                    )
 
             if image_callback is not None:
                 image_callback(image, seed, upscaled=True)
@@ -633,14 +633,7 @@ class Generate:
         model = instantiate_from_config(c.model)
         m, u  = model.load_state_dict(sd, strict=False)
         
-        if self.full_precision:
-            print(
-                '>> Using slower but more accurate full-precision math (--full_precision)'
-            )
-        else:
-            print(
-                '>> Using half precision math. Call with --full_precision to use more accurate but VRAM-intensive full precision.'
-            )
+        if not self.full_precision:
             model.half()
         model.to(self.device)
         model.eval()
@@ -662,9 +655,6 @@ class Generate:
 
     def _load_img(self, path, width, height, fit=False):
         assert os.path.exists(path), f'>> {path}: File not found'
-
-        #        with Image.open(path) as img:
-        #            image = img.convert('RGBA')
         image = Image.open(path)
         print(
             f'>> loaded input image of size {image.width}x{image.height} from {path}'
@@ -676,11 +666,8 @@ class Generate:
         return image
 
     def _create_init_image(self,image):
-        image = image.convert('RGB')
-        # print(
-        #     f'>> DEBUG: writing the image to img.png'
-        # )
-        # image.save('img.png')
+        image = image.convert("RGB")
+
         image = np.array(image).astype(np.float32) / 255.0
         image = image[None].transpose(0, 3, 1, 2)
         image = torch.from_numpy(image)
@@ -744,7 +731,7 @@ class Generate:
             new_img = new_img.transpose(Image.Transpose.ROTATE_270)
 
         return new_img
-
+    
     def _create_init_mask(self, image):
         # convert into a black/white mask
         image = self._image_to_mask(image)

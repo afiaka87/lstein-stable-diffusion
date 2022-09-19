@@ -372,7 +372,7 @@ class Args(object):
         postprocessing_group.add_argument(
             '--gfpgan_dir',
             type=str,
-            default='./src/gfpgan',
+            default=os.path.expanduser('~/.cache/gfpgan'),
             help='Indicates the directory containing the GFPGAN code.',
         )
         web_server_group.add_argument(
@@ -664,14 +664,48 @@ def metadata_dumps(opt,
         rfc_dict['seed'] = seed
         images.append(copy.copy(rfc_dict))
 
-    return {
-        'model'       : 'stable diffusion',
-        'model_id'    : opt.model,
-        'model_hash'  : model_hash,
-        'app_id'      : APP_ID,
-        'app_version' : APP_VERSION,
-        'images'      : images,
-    }
+def metadata_loads(metadata):
+    '''
+    Takes the dictionary corresponding to RFC266 (https://github.com/lstein/stable-diffusion/issues/266)
+    and returns a series of opt objects for each of the images described in the dictionary.
+    '''
+    results = []
+    try:
+        if 'grid' in metadata['sd-metadata']:
+            images = metadata['sd-metadata']['images']
+        else:
+            images = [metadata['sd-metadata']['image']]
+        for image in images:
+            # repack the prompt and variations
+            image['prompt']     = ','.join([':'.join([x['prompt'],   str(x['weight'])]) for x in image['prompt']])
+            image['variations'] = ','.join([':'.join([str(x['seed']),str(x['weight'])]) for x in image['variations']])
+            # fix a bit of semantic drift here
+            image['sampler_name']=image.pop('sampler')
+            opt = Args()
+            opt._cmd_switches = Namespace(**image)
+            results.append(opt)
+    except KeyError as e:
+        import sys, traceback
+        print('>> badly-formatted metadata',file=sys.stderr)
+        print(traceback.format_exc(), file=sys.stderr)
+    return results
+
+# image can either be a file path on disk or a base64-encoded
+# representation of the file's contents
+def calculate_init_img_hash(image_string):
+    prefix = 'data:image/png;base64,'
+    hash   = None
+    if image_string.startswith(prefix):
+        imagebase64 = image_string[len(prefix):]
+        imagedata   = base64.b64decode(imagebase64)
+        with open('outputs/test.png','wb') as file:
+            file.write(imagedata)
+        sha = hashlib.sha256()
+        sha.update(imagedata)
+        hash = sha.hexdigest()
+    else:
+        hash = sha256(image_string)
+    return hash
 
 # Bah. This should be moved somewhere else...
 def sha256(path):
