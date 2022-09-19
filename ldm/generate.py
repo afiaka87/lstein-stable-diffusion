@@ -734,7 +734,10 @@ class Generate:
     
     def _create_init_mask(self, image):
         # convert into a black/white mask
-        image = self._image_to_mask(image)
+        try:
+            image = self._image_to_mask(image)
+        except ValueError:
+            raise ValueError(f">> Error: {image} init mask must be RGBA, rgb/black and white images are not supported.")
         image = image.convert('RGB')
         # BUG: We need to use the model's downsample factor rather than hardcoding "8"
         from ldm.dream.generator.base import downsampling
