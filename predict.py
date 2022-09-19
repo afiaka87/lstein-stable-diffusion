@@ -10,9 +10,11 @@
 
 import sys
 
+from ldm.dream.args import Args
+
 # this uses the k-diffusion in our local directory, to use a pip install, remove this line, and check cog.yaml for further instructions.
 sys.path.append("k-diffusion")
-
+sys.path.append("backend")
 import random
 import tempfile
 
@@ -20,9 +22,10 @@ import torch
 import transformers
 from pytorch_lightning import logging
 
-from ldm.dream.args import Args
 from ldm.dream.pngwriter import PngWriter
 from ldm.generate import Generate
+
+from backend.modules.parameters import create_cmd_parser, parameters_to_command
 
 logging.getLogger("pytorch_lightning").setLevel(logging.ERROR)
 transformers.logging.set_verbosity_error()
@@ -45,9 +48,11 @@ from urllib.request import urlretrieve
 
 
 def download_image(url: str) -> str:
-    with tempfile.NamedTemporaryFile(suffix=".png") as f:
-        urlretrieve(url, f.name)
-        return f.name
+    if url is not None and url.startswith("http"):
+        with tempfile.NamedTemporaryFile(suffix=".png") as f:
+            urlretrieve(url, f.name)
+            return f.name
+    return None
 
 
 def parse_variation_pairs(with_variations):
@@ -222,32 +227,14 @@ class Predictor(BasePredictor):
         ),
     ) -> List[ImageSeedOutput]:
         """Generate an image from a prompt"""
-
-
-        if init_strength is None:
-            if outpaint_direction is not None:
-                init_strength = 0.83 # default for outpainting
-            else:
-                init_strength = 0.75 # default for all other cases
-
         if command_mode or prompt.startswith("!dream"):
-            dream_args = Args()
-            prediction_options = vars(dream_args.parse_cmd(prompt))
-            prediction_options["prompt"] = (
-                prediction_options["prompt"].replace("!dream", "").strip()
-            )
-            if prediction_options["init_img"].startswith("http"):
-                prediction_options["init_img"] = download_image(
-                    prediction_options["init_img"]
-                )
-            if prediction_options["init_url"].startswith("http"):
-                prediction_options["init_img"] = download_image(
-                    prediction_options["init_url"]
-                )
-            if prediction_options["init_mask"].startswith("http"):
-                prediction_options["init_mask"] = download_image(
-                    prediction_options["init_mask"]
-                )
+            prompt = prompt.replace("!dream", "")
+            command_parser = create_cmd_parser()
+            prediction_options = Args(cmd_parser=command_parser).parse_cmd(prompt)
+            prediction_options.init_img = download_image(prediction_options.init_img)
+            prediction_options.init_mask = download_image(prediction_options.init_mask)
+            prediction_options.init_color = download_image(prediction_options.init_color)
+            prediction_options = vars(prediction_options)
         else:
             # perform validation, etc
             if seed <= -1:
@@ -284,6 +271,13 @@ class Predictor(BasePredictor):
                 out_direction.append(outpaint_direction)
                 if outpaint_pixels is not None:
                     out_direction.append(outpaint_pixels)
+
+            if init_strength is None:
+                if outpaint_direction is not None:
+                    init_strength = 0.83 # default for outpainting
+                else:
+                    init_strength = 0.75 # default for all other cases
+
 
             init_img = str(init_img) if init_img else None
             init_mask = str(init_mask) if init_mask else None
