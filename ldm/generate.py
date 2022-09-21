@@ -373,7 +373,7 @@ class Generate:
                 mask_image     = mask_image,
                 strength       = strength,
                 threshold      = threshold,
-                perlin         = perlin
+                perlin         = perlin,
                 embiggen       = embiggen,
                 embiggen_tiles = embiggen_tiles,
             )
